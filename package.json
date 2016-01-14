@@ -1,0 +1,32 @@
+{
+    "name" : "pi",
+    "description" : "API Family that describes all endpoints related to  Cisco Items Purchased by a Customer. Learn More - http://wikicentral.cisco.com/display/CITSA/Mirror+Universe+-+An+SDA-Based+MVP",
+    "version" : "0.1.0",
+    "license": "TBD",
+    "dependencies": {
+        "express": "^4.13.0",
+        "body-parser": "^1.14.0",
+        "winston": "^2.1.0",
+        "morgan": "^1.6.1",
+        "swaggerize-express": "^4.0.0",
+        "mongoose": "^4.3.0",
+        "lodash": "^3.10.0",
+        "config": "^1.17.0",
+        "js-yaml": "^3.2.6"
+    },
+    "devDependencies": {
+        "gulp": "^3.9.0",
+        "gulp-eslint": "^1.1.1",
+        "gulp-jasmine": "^2.2.0",
+        "gulp-istanbul": "^0.10.3",
+        "eslint": "^1.10.0",
+        "enjoi": "^1.0.1",
+        "supertest": "^1.1.0"
+    },
+    "scripts": {
+        "test": "gulp test",
+        "cover": "gulp cover",
+        "lint": "gulp lint"
+    },
+    "main" : "./server"
+}

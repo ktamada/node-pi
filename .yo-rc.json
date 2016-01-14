@@ -1,0 +1,8 @@
+{
+  "generator-swagapi": {
+    "appname": "pi",
+    "slugName": "pi",
+    "database": "pidata",
+    "apiPath": "/vagrant/projects/pi/config/purchased_items_v_0_4.4_Vivek_NoRefs.yaml"
+  }
+}
