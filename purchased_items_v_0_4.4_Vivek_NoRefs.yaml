@@ -1,0 +1,404 @@
+swagger: '2.0'
+info:
+  title: Purchased Items API Family
+  description: 'API Family that describes all endpoints related to  Cisco Items Purchased by a Customer. Learn More - http://wikicentral.cisco.com/display/CITSA/Mirror+Universe+-+An+SDA-Based+MVP'
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    name: API Support
+    url: 'http://api.cisco.com'
+    email: eb_apiteam@cisco.com
+  license:
+    name: TBD
+  version: 0.1.0
+host: api.cisco.com
+basePath: /v0.1
+schemes:
+  - https
+produces:
+  - application/json
+paths:
+  /purchaseditems:
+    get:
+      tags:
+        - purchasedItems
+      summary: A list of Cisco product items purchased by an entity
+      description: 'This endpoint returns top level information about all products purchased by a specific Cisco customer. This can include hardware, software and service products. The "context" of the customer MUST be available and encoded appropriately (E.G. OpenID Connect based federation encapsulated as JSON Web Tokens (JWT) ) either as an x-http-token or part of the response itself. For hardware and software, all major (standalone or parent) and minor (child) line item instance summary information will be returned. For contract, all unique contract summary information will be returned. The response will also include URLs of individual products with endpoints pointing to a specific hardware/software instance or contract for obtaining further details. If serial number for a hardware or software exists, then the url will take the form, "https://api.cisco.com/purchaseditems/{product_id}/iteminstance/{instance_id}". If serial number and duplicate serial number do not exist, then url will take the form, "https://api.cisco.com/purchaseditems/NA/iteminstance/{instance_id}". If the product_type is a "service", then url will take the form, "https://api.cisco.com/purchasedContractItems/{contract_id}".'
+      operationId: getPurchasedItems
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: range
+          description: 'This is a flattened 2-tuple parameter {x, y}, where x is the start count for the records requested and y is the number of records requested (e.g. http:/path/to/service? range=(0,10)). x = 0 (default) indicates that the range starts at the beginning of the record-set. x = -1 indicates that the range starts at the end of the record-set. y MUST be <= 100.'
+          type: string
+          required: true
+      responses:
+        '200':
+          description: Success
+          schema:
+            title: List of purchased items
+            type: array
+            items:
+              $ref: '#/definitions/purchasedItemSummary'
+        '404':
+          description: No such products list found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - api-key: []
+  '/purchasedContractItems/{contract_id}':
+    get:
+      tags:
+        - purchasedContractItems
+      summary: A list of Cisco contracts purchased by an entity
+      description: 'This endpoint returns top level information about a specific contract purchased by a specific Cisco customer. The "context" of the customer MUST be available and encoded appropriately (E.G. OpenID Connect based federation encapsulated as JSON Web Tokens (JWT) ) either as an x-http-token or part of the response itself. All unique combinations of input contract and service line summary information will be returned. The response will also include URLs of individual service products with endpoints pointing to a specific service line for obtaining further summary information. The url will take the form, "https://api.cisco.com/purchaseditems/{product_id}/serviceline/{service_line_id}".'
+      operationId: getPurchasedContractItems
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: contract_id
+          description: Contract id of the requested Purchased Items
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: range
+          description: 'This is a flattened 2-tuple parameter {x, y}, where x is the start count for the records requested and y is the number of records requested (e.g. http:/path/to/service? range=(0,10)). x = 0 (default) indicates that the range starts at the beginning of the record-set. x = -1 indicates that the range starts at the end of the record-set. y MUST be <= 100.'
+          type: string
+          required: true
+      responses:
+        '200':
+          description: Success
+          schema:
+            title: List of purchased contract items
+            type: array
+            items:
+              $ref: '#/definitions/purchasedItemSummary'
+        '404':
+          description: No such products list found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - api-key: []
+  '/purchaseditems/{contract_id}/serviceline/{service_line_id}':
+    get:
+      tags:
+        - purchasedContractServiceItems
+      summary: Get details about a specific contract service line
+      description: 'This endpoint returns top level information about a specific contract service line purchased by a specific Cisco customer. The "context" of the customer MUST be available and encoded appropriately (E.G. OpenID Connect based federation encapsulated as JSON Web Tokens (JWT) ) either as an x-http-token or part of the response itself. All unique combinations of input service line and product instance summary information will be returned. The response will also include URLs of individual products with endpoints pointing to a specific hardware/software product instance. If serial number for a hardware or software exists, then the url will take the form, "https://api.cisco.com/purchaseditems/{product_id}/iteminstance/{instance_id}". If serial number and duplicate serial number do not exist, then url will take the form, "https://api.cisco.com/purchaseditems/NA/iteminstance/{instance_id}".'
+      operationId: getPurchasedContractServiceItems
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: contract_id
+          description: Contract id of the requested Purchased Item
+          required: true
+          type: integer
+          format: int64
+        - in: path
+          name: service_line_id
+          description: Contract service line
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: range
+          description: 'This is a flattened 2-tuple parameter {x, y}, where x is the start count for the records requested and y is the number of records requested (e.g. http:/path/to/service? range=(0,10)). x = 0 (default) indicates that the range starts at the beginning of the record-set. x = -1 indicates that the range starts at the end of the record-set. y MUST be <= 100.'
+          type: string
+          required: true
+      responses:
+        '200':
+          description: Successs
+          schema:
+            $ref: '#/definitions/purchasedItemSummary'
+        '404':
+          description: No such product found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - api-key: []
+  '/purchaseditems/{product_id}':
+    get:
+      tags:
+        - productId
+      summary: 'Get a specific purchased item identified by a product id. The product id can be a hardware serial number, a software pak id or a contract id'
+      description: 'This endpoint returns detailed information about a specific product purchased by a specific Cisco customer. The "context" of the customer MUST be available and encoded appropriately (E.G. OpenID Connect based federation encapsulated as JSON Web Tokens (JWT) ) either as an x-http-token or part of the response itself. For a hardware or software product, a single standalone major line instance details will be returned or a single parent major line instance details along with one or more child minor line instance URLs will be returned. The URLs will take the form, "https://api.cisco.com/purchaseditems/{product_id}/iteminstance/{instance_id}/iteminstance/{instance_id}" if serial number and duplicate serial number for the minor line instance exists. The URLs will take the form, "https://api.cisco.com/purchaseditems/NA/iteminstance/{instance_id}/iteminstance/{instance_id}" if serial number and duplicate serial number for the minor line instance does not exist.'
+      operationId: getPurchasedItemByProductId
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: product_id
+          description: Product Id of the requested Purchased Item
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/purchasedItemDetails'
+        '404':
+          description: No such product found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - api-key: []
+  '/purchaseditems/{product_id}/iteminstance/{instance_id}':
+    get:
+      tags:
+        - itemInstance
+      summary: Get details about a specific major line item
+      description: 'This endpoint returns detailed information about a specific product purchased by a specific Cisco customer. The "context" of the customer MUST be available and encoded appropriately (E.G. OpenID Connect based federation encapsulated as JSON Web Tokens (JWT) ) either as an x-http-token or part of the response itself. For a hardware or software product, a single standalone major line instance details will be returned or a single parent major line instance details along with one or more child minor line instance URLs will be returned. The URLs will take the form, "https://api.cisco.com/purchaseditems/{product_id}/iteminstance/{instance_id}/iteminstance/{instance_id}" if serial number and duplicate serial number for the minor line instance exists. The URLs will take the form, "https://api.cisco.com/purchaseditems/NA/iteminstance/{instance_id}/iteminstance/{instance_id}" if serial number and duplicate serial number for the minor line instance does not exist. This service can also return details for a minor line instance product if the product_id and/or instance_id passed belongs to a minor line instance.'
+      operationId: getProductInstance
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: product_id
+          description: Product id of the requested Purchased Item
+          required: true
+          type: integer
+          format: int64
+        - in: path
+          name: instance_id
+          description: The major line level instance ID
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successs
+          schema:
+            $ref: '#/definitions/purchasedItemDetails'
+        '404':
+          description: No such product found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - api-key: []
+  '/purchaseditems/{product_id}/iteminstance/{instance_parent_id}/iteminstance/{instance_id}':
+    get:
+      tags:
+        - minorItemproductInstance
+      summary: Get details about a specific minor line item
+      description: 'This endpoint returns detailed information about a specific product purchased by a specific Cisco customer. It is a leaf minor product item instance. The "context" of the customer MUST be available and encoded appropriately (E.G. OpenID Connect based federation encapsulated as JSON Web Tokens (JWT) ) either as an x-http-token or part of the response itself. The response will include a URL to itself.'
+      operationId: getMinorProductInstance
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: product_id
+          description: Product id of the requested Purchased Item
+          required: true
+          type: integer
+          format: int64
+        - in: path
+          name: instance_parent_id
+          description: 'The top level (hw, sw, sv) instance ID of a specific instance'
+          required: true
+          type: integer
+          format: int64
+        - in: path
+          name: instance_id
+          description: The minor line level instance ID
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successs
+          schema:
+            $ref: '#/definitions/purchasedItemDetails'
+        '404':
+          description: No such product found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - api-key: []
+definitions:
+  purchasedItemSummary:
+    type: object
+    required:
+      - _id
+      - smart_account_id
+      - product_type
+      - purchased_item_url
+    properties:
+      _id:
+        type: integer
+        format: int64
+        description: Corresponds to the instance_id
+      smart_account_id:
+        type: integer
+        format: int64
+      virtual_account_id:
+        type: integer
+        format: int64
+      product_id:
+        type: string
+        description: Represents a hardware serial number or a software pak id or a contract id. In some cases this can be null
+      instance_id:
+        type: integer
+        format: int64
+        description: Represents either a major or minor line item
+      service_line_id:
+        type: integer
+        format: int64
+      name:
+        type: string
+        description: 'In case of a hardware/software product, it will be the item name. In case of a contract, it will be the coverage contract name. In case of a service line, it will be the service line name'
+      product_type:
+        type: string
+        description: "Identifies a product as a 'hardware', 'software' or 'service'"
+      purchased_item_url:
+        type: string
+        description: 'URI representing a specific purchased item. If product_id is not null, then the url will take the form, "https://api.cisco.com/purchaseditems/{id}". The last item in the URL path is the product_id. If product_id is null, then url will take the form, "https://api.cisco.com/purchaseditems/NA/iteminstance/{instance_id}". The last item in the URL path is the instance_id. If the product_type is a "service", then url will take the form, "https://api.cisco.com/purchasedContractItems/{contract_id}" or "https://api.cisco.com/purchasedItems/{id}/serviceline/{service_line_id}"  or "https://api.cisco.com/purchasedItems/{id}/iteminstance/{instance_id}".'
+      item_status:
+        type: string
+        description: 'In case of IB, this will show the instance status description and in case of contract, this will show the contract status'
+      children:
+        type: array
+        items:
+          type: object
+  purchasedItemDetails:
+    type: object
+    title: Purchased products and contracts
+    required:
+      - _id
+      - smart_account_id
+      - purchased_item_instance_url
+      - instance_id
+      - item_name
+      - product_type
+    properties:
+      _id:
+        type: integer
+        format: int64
+        description: Corresponds to the instance_id
+      smart_account_id:
+        type: integer
+        format: int64
+      virtual_account_id:
+        type: integer
+        format: int64
+      purchased_item_instance_url:
+        type: string
+        description: 'URI representing a specific purchased item instance. For a standalone or a parent (major) product instance, the url will take the form, "https://api.cisco.com/purchaseditems/{id}/iteminstance/{instance_id}".'
+      serial_number:
+        type: string
+        description: Represents a hardware serial number. In some cases this can be null.
+      instance_id:
+        type: integer
+        format: int64
+        description: Represents either a major or minor line item
+      service_line_id:
+        type: integer
+        format: int64
+      service_line_name:
+        type: string
+      instance_party_d:
+        type: integer
+        format: int64
+      item_name:
+        type: string
+        description: Hardware/Software product item name
+      item_type_flag:
+        type: string
+      inventory_item_id:
+        type: integer
+        format: int64
+      dup_serial_number:
+        type: string
+        description: Represents a software pak id. In some cases this can be null.
+      quantity:
+        type: integer
+        format: int64
+      po_number:
+        type: string
+      so_number:
+        type: string
+      so_line_id:
+        type: string
+      contract_number:
+        type: string
+      contract_id:
+        type: integer
+        format: int64
+      install_location_id:
+        type: integer
+        format: int64
+      install_at_party_id:
+        type: integer
+        format: int64
+      warranty_type:
+        type: string
+      warranty_start_date:
+        type: string
+      warranty_end_date:
+        type: string
+      bill_to_site_use_id:
+        type: integer
+        format: int64
+      bill_to_party_id:
+        type: integer
+        format: int64
+      product_type:
+        type: string
+        description: "Identifies a product as a 'hardware', 'software' or 'service'"
+      contract_status:
+        type: string
+      service_line_status:
+        type: string
+      coverage_template_desc:
+        type: string
+      product_family:
+        type: string
+      support_party:
+        type: string
+      creation_date:
+        type: string
+      last_update_date:
+        type: string
+      parent_instance_id:
+        type: integer
+        format: int64
+        description: Represents a major line item (parent of one ore more minor line items)
+      instance_status_desc:
+        type: string
+      item_type:
+        type: string
+      children:
+        type: array
+        items:
+          type: integer
+          format: int64
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+securityDefinitions:
+  api-key:
+    type: apiKey
+    name: X-HTTP-Token
+    in: header
